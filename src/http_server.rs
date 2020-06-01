@@ -1,3 +1,4 @@
+use crate::request_data::build_request;
 use std::net::{TcpStream, TcpListener};
 use std::io::{Read, Write};
 use std::thread;
@@ -7,14 +8,20 @@ fn handle_read(mut stream: &TcpStream) {
     match stream.read(&mut buf) {
         Ok(_) => {
                 let req_str = String::from_utf8_lossy(&buf);
-                println!("Read stream: \r\n{}", req_str);
+                build_request(req_str.to_string());
+                // println!("Read stream: \r\n{}", req_str);
             },
         Err(e) => println!("Unable to read stream: {}", e),
     }
 }
 
 fn handle_write(mut stream: TcpStream) {
-    match stream.write(render_response(200, "text/html", "<html><body>Hello world</body></html>").as_bytes()) {
+    let json_string: &str = r#"
+        {
+            "test": 1
+        }
+    "#;
+    match stream.write(render_response(200, "application/json", json_string).as_bytes()) {
         Ok(_) => println!("Response sent"),
         Err(e) => println!("Failed sending response: {}", e),
     }
